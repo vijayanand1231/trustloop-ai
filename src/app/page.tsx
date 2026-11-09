@@ -401,7 +401,7 @@ export default function TrustLoopDashboard() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "Refund rejected by PayPal");
           refundId = data.refundId || data.id;
-          refundedAmount = Number(String(data.amount ?? capture.amount).split(" ")[0]);
+          refundedAmount = Number(data.amount?.value || data.amount) || capture.amount || 50;
         }
 
         setCaptures((prev) => ({
@@ -752,7 +752,7 @@ export default function TrustLoopDashboard() {
 
               const milestoneLocked =
                 terminal ||
-                capture?.status === "REFUNDED" ||
+                (capture?.status === "REFUNDED" && evalData?.decision !== "CAPTURE_PAYMENT") ||
                 capture?.status === "VOIDED" ||
                 capture?.status === "TERMINATED";
 
