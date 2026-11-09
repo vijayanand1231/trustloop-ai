@@ -250,7 +250,7 @@ assert("SEC-03", "DEV_AUTH_ENABLED does not contain unconditional '|| true' back
   !pageSrc.includes('NEXT_PUBLIC_ENABLE_DEV_AUTH === "true" || true'));
 
 console.log("\n========================================================");
-console.log(` 🎯 TEST RUN COMPLETE: passed/{total} ASSERTIONS PASSED`);
+console.log(` 🎯 TEST RUN COMPLETE: ${passed}/${total} ASSERTIONS PASSED`);
 console.log("========================================================\n");
 
 if (passed !== total) process.exit(1);

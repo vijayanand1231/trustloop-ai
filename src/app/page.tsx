@@ -342,7 +342,7 @@ export default function TrustLoopDashboard() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-Idempotency-Key": `cap:authId:{milestone.id}`,
+              "X-Idempotency-Key": `cap:${authId}:${milestone.id}`,
             },
             body: JSON.stringify({
               authorizationId: authId,
