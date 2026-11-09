@@ -60,7 +60,7 @@ interface CaptureRecord {
 
 const DEV_AUTH_ENABLED =
   process.env.NODE_ENV !== "production" &&
-  (process.env.NEXT_PUBLIC_ENABLE_DEV_AUTH === "true" || true);
+  (process.env.NEXT_PUBLIC_ENABLE_DEV_AUTH === "true");
 
 export default function TrustLoopDashboard() {
   const [brief, setBrief] = useState(

@@ -106,7 +106,7 @@ export async function createEscrowOrder({
         amount: { currency_code: currency, value: formattedAmount },
       }],
     },
-    idempotencyKey: idempotencyKey ?? `order:Date.now():{formattedAmount}`,
+    idempotencyKey: idempotencyKey ?? `order:${Date.now()}:${formattedAmount}`,
   });
 }
 
@@ -149,7 +149,7 @@ export async function captureAuthorizedPayment({
 
   const data = await paypalFetch("POST", `/v2/payments/authorizations/${id}/capture`, {
     body: payload,
-    idempotencyKey: idempotencyKey ?? `capture:id:{payload.amount?.value ?? "full"}:${isFinalCapture}`,
+    idempotencyKey: idempotencyKey ?? `capture:${id}:${payload.amount?.value ?? "full"}:${isFinalCapture}`,
   });
 
   const rawAmount =
@@ -190,7 +190,7 @@ export async function refundCapturedPayment({
 
   const data = await paypalFetch("POST", `/v2/payments/captures/${id}/refund`, {
     body,
-    idempotencyKey: idempotencyKey ?? `refund:id:{body.amount?.value ?? "full"}`,
+    idempotencyKey: idempotencyKey ?? `refund:${id}:${body.amount?.value ?? "full"}`,
   });
 
   return {

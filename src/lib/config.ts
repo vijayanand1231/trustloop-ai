@@ -12,13 +12,12 @@ export interface Config {
 }
 
 export function getConfig(): Config {
-  let clientId = process.env.PAYPAL_CLIENT_ID || "";
-  let clientSecret = process.env.PAYPAL_CLIENT_SECRET || process.env.PAYPAL_SECRET || "";
-  let apiBase = process.env.PAYPAL_BASE_URL || process.env.PAYPAL_API_BASE || "https://api-m.sandbox.paypal.com";
-  let llmApiKey = process.env.LLM_API_KEY || "";
+  let clientId = (process.env.PAYPAL_CLIENT_ID || "").trim().replace(/^["']|["']$/g, "");
+  let clientSecret = (process.env.PAYPAL_CLIENT_SECRET || process.env.PAYPAL_SECRET || "").trim().replace(/^["']|["']$/g, "");
+  let apiBase = (process.env.PAYPAL_BASE_URL || process.env.PAYPAL_API_BASE || "https://api-m.sandbox.paypal.com").trim().replace(/^["']|["']$/g, "").replace(/\/+$/, "");
+  let llmApiKey = (process.env.LLM_API_KEY || "").trim().replace(/^["']|["']$/g, "");
   let enableDevAuth = process.env.NEXT_PUBLIC_ENABLE_DEV_AUTH === "true";
 
-  // Fallback to .env.local only if running standalone and variables are missing
   if (!clientId || !clientSecret || !llmApiKey) {
     const envPath = path.resolve(process.cwd(), ".env.local");
     if (fs.existsSync(envPath)) {
@@ -33,7 +32,7 @@ export function getConfig(): Config {
             const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
             if (key === "PAYPAL_CLIENT_ID" && !clientId) clientId = val;
             if ((key === "PAYPAL_CLIENT_SECRET" || key === "PAYPAL_SECRET") && !clientSecret) clientSecret = val;
-            if ((key === "PAYPAL_API_BASE" || key === "PAYPAL_BASE_URL") && !process.env.PAYPAL_API_BASE && !process.env.PAYPAL_BASE_URL) apiBase = val;
+            if ((key === "PAYPAL_API_BASE" || key === "PAYPAL_BASE_URL") && !process.env.PAYPAL_API_BASE && !process.env.PAYPAL_BASE_URL) apiBase = val.replace(/\/+$/, "");
             if (key === "LLM_API_KEY" && !llmApiKey) llmApiKey = val;
             if (key === "NEXT_PUBLIC_ENABLE_DEV_AUTH" && process.env.NEXT_PUBLIC_ENABLE_DEV_AUTH === undefined) {
               enableDevAuth = val === "true";
