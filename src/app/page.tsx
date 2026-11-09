@@ -474,6 +474,7 @@ export default function TrustLoopDashboard() {
         });
         setTerminationReason("TURNKEY full clawback: downstream default invalidated all stages.");
         setAuthId("");
+        setEvaluations({});
         setContractStatus("TERMINATED_REFUNDED");
       } else {
         const voided = await voidAuthorizationRemote("MODULAR_REMAINING_VOID");
