@@ -15,7 +15,8 @@ type ContractStatus =
   | "PARTIALLY_SETTLED"
   | "DISPUTED"
   | "TERMINATED_REFUNDED"
-  | "COMPLETED_SETTLED";
+  | "COMPLETED_SETTLED"
+  | "COMPLETED_WITH_REFUNDS";
 
 type MilestoneStatus =
   | "PENDING"
@@ -26,7 +27,8 @@ type MilestoneStatus =
   | "VOIDED"
   | "TERMINATED";
 
-const TERMINAL_STATUSES: ContractStatus[] = ["TERMINATED_REFUNDED", "COMPLETED_SETTLED"];
+const TERMINAL_STATUSES: ContractStatus[] = [
+  "COMPLETED_WITH_REFUNDS","TERMINATED_REFUNDED", "COMPLETED_SETTLED"];
 const isTerminal = (s: ContractStatus) => TERMINAL_STATUSES.includes(s);
 
 interface Milestone {
@@ -64,7 +66,7 @@ const DEV_AUTH_ENABLED =
 
 export default function TrustLoopDashboard() {
   const [brief, setBrief] = useState(
-    "Custom IoT Sensor Network contract with 150totalbudget.Stage1:PrototypeandwaterproofIP67enclosure(50). Stage 2: Mass production calibration (50).Stage3:Finaldelivery(50)."
+    "Custom IoT Sensor Network contract with $150 total budget. Stage 1: Prototype and waterproof IP67 enclosure ($50). Stage 2: Mass production calibration ($50). Stage 3: Final delivery ($50)."
   );
 
   const [contractMeta, setContractMeta] = useState<ContractMeta>({
@@ -274,13 +276,13 @@ export default function TrustLoopDashboard() {
   }
 
   function loadHardwareTurnkeyPreset() {
-    const text = "Custom IoT Sensor Network contract with 150totalbudget.Stage1:PrototypeandwaterproofIP67enclosure(50). Stage 2: Mass production calibration (50).Stage3:Finaldelivery(50).";
+    const text = "Custom IoT Sensor Network contract with $150 total budget. Stage 1: Prototype and waterproof IP67 enclosure ($50). Stage 2: Mass production calibration ($50). Stage 3: Final delivery ($50).";
     setBrief(text);
     handleExtractMilestones(text);
   }
 
   function loadSoftwareModularPreset() {
-    const text = "Full-stack SaaS platform development with 150totalbudget.Stage1:UXdesignmockupsandFigmaarchitecture(50). Stage 2: Core REST API backend (50).Stage3:Productiondeployment&CI/CDpipeline(50).";
+    const text = "Full-stack SaaS platform development with $150 total budget. Stage 1: UX design mockups and Figma architecture ($50). Stage 2: Core REST API backend ($50). Stage 3: Production deployment & CI/CD pipeline ($50).";
     setBrief(text);
     handleExtractMilestones(text);
   }
@@ -557,10 +559,11 @@ export default function TrustLoopDashboard() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard label="Authorized Hold" value={totalAmount} subtitle={terminal ? "CLOSED" : authId || "Awaiting Auth"} tone="white" />
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <StatCard label="Authorized Hold" value={authId ? totalAmount : 0} subtitle={terminal ? "CLOSED" : authId || "Awaiting Auth"} tone="white" />
           <StatCard label="Disbursed" value={totalDisbursed} subtitle={`${Object.values(captures).filter(c=>c.status==="CAPTURED").length} capture(s)`} tone="emerald" />
           <StatCard label="Refunded" value={totalRefunded} subtitle={`${Object.values(captures).filter(c=>c.status==="REFUNDED").length} refund(s)`} tone="amber" />
+          <StatCard label="Voided" value={totalVoided} subtitle={totalVoided > 0 ? "Returned to buyer" : "—"} tone="rose" />
           <StatCard label="Remaining in Vault" value={totalRemaining} subtitle={terminal ? "Released / Voided" : "Protected"} tone="indigo" />
         </div>
 
@@ -819,10 +822,10 @@ export default function TrustLoopDashboard() {
 
 function StatCard({
   label, value, subtitle, tone,
-}: { label: string; value: number; subtitle: string; tone: "white" | "emerald" | "amber" | "indigo" }) {
+}: { label: string; value: number; subtitle: string; tone: "white" | "emerald" | "amber" | "indigo" | "rose" | string | "rose" | string }) {
   const toneClass =
     tone === "white" ? "text-white"
-    : tone === "emerald" ? "text-emerald-400"
+    : tone === "rose" ? "text-rose-400" : tone === "emerald" ? "text-emerald-400"
     : tone === "amber" ? "text-amber-400"
     : "text-indigo-400";
   return (
