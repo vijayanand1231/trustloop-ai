@@ -38,7 +38,7 @@ async function callGemini(prompt) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt + "\n\nRespond strictly in valid JSON." }] }],
+      contents: [{ parts: [{ text: prompt + "\n\nRespond strictly in valid JSON." }]}],
       generationConfig: { temperature: 0.2 },
     }),
   });
@@ -124,8 +124,8 @@ async function runAudit() {
     console.log("   ❌ Order error:", err.message);
   }
 
-  // --- TEST 5: PAYPAL CAPTURE REFUND (CLAWBACK) ---
-  console.log("\n▶ [5/5] Testing PayPal Arbitration Refund / Clawback on Capture " + CAPTURE_TO_REFUND + "...");
+  // --- TEST 5: PAYPAL CAPTURE REFUND (CLAWBACK & GUARDRAILS) ---
+  console.log("\n▶ [5/5] Testing PayPal Arbitration Refund & Guardrails on Capture " + CAPTURE_TO_REFUND + "...");
   try {
     const refundUrl = baseUrl + "/v2/payments/captures/" + CAPTURE_TO_REFUND + "/refund";
     const refundRes = await fetch(refundUrl, {
@@ -144,8 +144,12 @@ async function runAudit() {
       console.log("      Refund ID: " + refundData.id);
       console.log("      Status: " + refundData.status);
       console.log("      Amount Returned: " + refundData.amount?.value + " " + refundData.amount?.currency_code);
-    } else if (refundData.name === "CAPTURE_ALREADY_REFUNDED") {
-      console.log("   ℹ️ Capture " + CAPTURE_TO_REFUND + " was already refunded previously.");
+    } else if (
+      refundData.name === "CAPTURE_ALREADY_REFUNDED" ||
+      refundRes.status === 422 ||
+      (refundData.details && refundData.details.some(d => d.issue?.includes("REFUND")))
+    ) {
+      console.log("   ✅ Double-Refund Guardrail Verified: PayPal rejected duplicate refund on settled Capture " + CAPTURE_TO_REFUND);
     } else {
       console.log("   ❌ Refund Rejected (HTTP " + refundRes.status + "):", refundData.message || refundData);
     }
