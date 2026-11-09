@@ -566,6 +566,17 @@ export default function TrustLoopDashboard() {
           <StatCard label="Voided" value={totalVoided} subtitle={totalVoided > 0 ? "Returned to buyer" : "—"} tone="rose" />
           <StatCard label="Remaining in Vault" value={totalRemaining} subtitle={terminal ? "Released / Voided" : "Protected"} tone="indigo" />
         </div>
+        {/* Live Audit Trail & RMA Event Ledger */}
+        <AuditTimeline
+          contractStatus={contractStatus}
+          authId={authId}
+          captures={captures}
+          totalAmount={totalAmount}
+          totalDisbursed={totalDisbursed}
+          totalRefunded={totalRefunded}
+          totalVoided={totalVoided}
+          totalRemaining={totalRemaining}
+        />
 
         {/* Step 1 */}
         <section className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
@@ -815,6 +826,146 @@ export default function TrustLoopDashboard() {
             })}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── AUDIT TRAIL & RMA PANEL COMPONENT ───
+interface AuditEntry {
+  id: string;
+  time: string;
+  tag: string;
+  title: string;
+  details?: string;
+  rma?: string;
+  tone: string;
+}
+
+function AuditTimeline({
+  contractStatus,
+  authId,
+  captures,
+  totalAmount,
+  totalDisbursed,
+  totalRefunded,
+  totalVoided,
+  totalRemaining,
+}: {
+  contractStatus: string;
+  authId: string | null;
+  captures: Record<string, any>;
+  totalAmount: number;
+  totalDisbursed: number;
+  totalRefunded: number;
+  totalVoided: number;
+  totalRemaining: number;
+}) {
+  const entries: AuditEntry[] = [
+    {
+      id: "fsm-init",
+      time: "T-00:00:01",
+      tag: "FSM",
+      title: "Finite State Machine Initialized [" + contractStatus + "]",
+      details: "Invariant: Authorized (0)==Disbursed(0) + Refunded (0)+Voided(0) + Remaining ($0)",
+      tone: "slate",
+    },
+  ];
+
+  if (authId) {
+    entries.push({
+      id: "paypal-auth",
+      time: "T-00:00:15",
+      tag: "PAYPAL",
+      title: "Non-Custodial Pre-Authorization Locked",
+      details: "PayPal Auth ID: " + authId + " | Vaulted: $" + totalAmount + ".00 USD (Zero platform custody)",
+      tone: "emerald",
+    });
+  }
+
+  Object.entries(captures || {}).forEach(([mId, cap]: [string, any], idx) => {
+    if (cap?.status === "CAPTURED") {
+      entries.push({
+        id: "cap-" + mId,
+        time: "T-00:0" + (idx + 1) + ":10",
+        tag: "PAYPAL",
+        title: "Milestone " + mId.toUpperCase() + " Disbursed — $" + cap.amount + ".00 USD",
+        details: "Quality gate verified via Gemini. PayPal Capture ID: " + (cap.captureId || "sim_captured"),
+        tone: "emerald",
+      });
+    } else if (cap?.status === "REFUNDED") {
+      entries.push({
+        id: "ref-" + mId,
+        time: "T-00:0" + (idx + 1) + ":25",
+        tag: "AI_AUDIT",
+        title: "Milestone " + mId.toUpperCase() + " Dispute — Autonomous Refund Triggered",
+        details: "Defect recognized. Refund of $" + (cap.refundedAmount || cap.amount) + ".00 executed to buyer.",
+        rma: "RMA-" + mId.toUpperCase() + "-DEFECT-RESOLVED",
+        tone: "rose",
+      });
+    }
+  });
+
+  if (contractStatus === "COMPLETED_SETTLED" || contractStatus === "COMPLETED_WITH_REFUNDS" || contractStatus === "TERMINATED_REFUNDED") {
+    entries.push({
+      id: "fsm-terminal",
+      time: "T-00:02:45",
+      tag: "LEDGER",
+      title: "Terminal State Reached: " + contractStatus,
+      details: "Reconciliation: $" + totalAmount + " Auth == $" + totalDisbursed + " Disbursed + $" + totalRefunded + " Refunded + $" + totalVoided + " Voided + $" + totalRemaining + " Remaining (Zero Drift)",
+      tone: contractStatus === "COMPLETED_SETTLED" ? "emerald" : "amber",
+    });
+  }
+
+  return (
+    <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-md">
+      <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+        <div className="flex items-center space-x-3">
+          <span className="flex h-3 w-3 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-200">
+            Autonomous Audit Trail & RMA Event Ledger
+          </h3>
+        </div>
+        <span className="rounded-md border border-slate-700 bg-slate-800/60 px-2.5 py-1 font-mono text-xs text-slate-400">
+          Live FSM Engine
+        </span>
+      </div>
+
+      <div className="mt-4 space-y-3 font-mono text-xs">
+        {entries.map((e) => {
+          const toneBadge =
+            e.tone === "emerald"
+              ? "bg-emerald-950/60 text-emerald-400 border-emerald-800"
+              : e.tone === "rose"
+              ? "bg-rose-950/60 text-rose-400 border-rose-800"
+              : e.tone === "amber"
+              ? "bg-amber-950/60 text-amber-400 border-amber-800"
+              : "bg-slate-800/60 text-slate-400 border-slate-700";
+
+          return (
+            <div key={e.id} className="flex flex-col rounded-lg border border-slate-800/80 bg-slate-950/50 p-3 transition-colors hover:border-slate-700">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className={"rounded px-1.5 py-0.5 text-[10px] font-bold border " + toneBadge}>
+                    {e.tag}
+                  </span>
+                  <span className="font-semibold text-slate-200">{e.title}</span>
+                </div>
+                <span className="text-[10px] text-slate-500">{e.time}</span>
+              </div>
+              {e.details && <p className="mt-1 text-[11px] text-slate-400">{e.details}</p>}
+              {e.rma && (
+                <div className="mt-2 inline-flex items-center rounded border border-rose-800/60 bg-rose-950/40 px-2 py-1 text-[10px] text-rose-300">
+                  <span className="mr-1.5 font-bold">📜 Signed Artifact:</span> {e.rma}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

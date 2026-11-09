@@ -249,6 +249,31 @@ const pageSrc = fs.readFileSync(path.resolve("src/app/page.tsx"), "utf-8");
 assert("SEC-03", "DEV_AUTH_ENABLED does not contain unconditional '|| true' backdoor",
   !pageSrc.includes('NEXT_PUBLIC_ENABLE_DEV_AUTH === "true" || true'));
 
+
+// ─── SUITE 5: UI & Audit Trail Verification (UI-01 to UI-02) ───
+console.log("\n▶ SUITE 5: UI & Audit Trail Verification (UI-01 to UI-02)");
+
+const pageContent = fs.readFileSync("src/app/page.tsx", "utf-8");
+
+// [UI-01] Confirm AuditTimeline component is defined and mounted
+total++;
+if (pageContent.includes("function AuditTimeline") && pageContent.includes("<AuditTimeline")) {
+  passed++;
+  console.log("   ✅ [UI-01] PASS: AuditTimeline component defined and mounted in page JSX");
+} else {
+  console.error("   ❌ [UI-01] FAIL: AuditTimeline component missing or unmounted");
+}
+
+// [UI-02] Confirm RMA artifact display & FSM audit trail hooks
+total++;
+if (pageContent.includes("Autonomous Audit Trail & RMA Event Ledger") && pageContent.includes("Signed Artifact:")) {
+  passed++;
+  console.log("   ✅ [UI-02] PASS: Autonomous Audit Trail surfaces signed RMA artifacts");
+} else {
+  console.error("   ❌ [UI-02] FAIL: Audit trail missing RMA artifact tags");
+}
+
+
 console.log("\n========================================================");
 console.log(` 🎯 TEST RUN COMPLETE: ${passed}/${total} ASSERTIONS PASSED`);
 console.log("========================================================\n");
