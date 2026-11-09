@@ -9,9 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@paypal/paypal-js": "^11.3.0",
+    "@paypal/react-paypal-js": "^10.6.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.70.0",
     "next": "16.4.5",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
