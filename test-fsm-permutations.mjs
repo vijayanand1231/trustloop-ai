@@ -218,5 +218,5 @@ try {
 assert("Milestone editing rejected once escrow is authorized", tamperFailed);
 
 console.log("\n========================================================");
-console.log(` 🎯 PERMUTATION SUITE RESULTS: passed/{total} TESTS PASSED`);
+console.log(` 🎯 PERMUTATION SUITE RESULTS: ${passed}/${total} TESTS PASSED`);
 console.log("========================================================\n");

@@ -4,7 +4,7 @@
 [![Test Suite](https://img.shields.io/badge/tests-27%2F27_passed-brightgreen)](#)
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.5-black)](#)
 [![PayPal](https://img.shields.io/badge/PayPal-v2_REST-blue)](#)
-[![Gemini](https://img.shields.io/badge/Gemini-1.5_Pro-orange)](#)
+[![Gemini](https://img.shields.io/badge/Gemini-Flash--Lite-orange)](#)
 
 A non-custodial milestone escrow system powered by **PayPal v2 pre-authorizations** and **Google Gemini quality arbitration**, eliminating freelance/agency dispute deadlocks through mathematical zero-drift financial invariants and autonomous resolution.
 
@@ -26,8 +26,8 @@ Funds never leave PayPal's native authorization rail until deliverable milestone
 * **Domain-Aware Contract Archetyping:**
   * **Turnkey (Hardware/Physical):** Strict interdependency. If a downstream stage fails (e.g., waterproof testing), it retroactively invalidates previous stages and triggers a full PayPal authorization void/clawback.
   * **Modular (Software/SaaS):** Independent sprint integrity. Completed milestones retain disbursed funds; disputed milestones are selectively refunded.
-* **Gemini 1.5 Automated Arbitration:** Freelancers submit proof artifacts. Gemini evaluates specification compliance, issuing either a cryptographic payout capture or an autonomous refund.
-* **The "Remedy & Re-Capture" Loop:** A robust Finite State Machine (FSM) that allows contractors to resubmit proof for refunded milestones. Upon AI approval, the system dynamically unblocks downstream prerequisites and allows re-capture.
+* **Gemini Flash-Lite Automated Arbitration:** Freelancers submit proof artifacts. Gemini evaluates specification compliance, issuing either a an automated PayPal capture or an autonomous refund.
+* **The FSM Remedy Arc:** A robust Finite State Machine (FSM) that allows contractors to resubmit proof for refunded milestones. Upon AI re-approval, the UI re-opens the milestone for capture within the authorization's remaining headroom.
 * **Live Audit Trail & RMA Event Ledger:** A real-time, terminal-style chronological event log surfacing FSM state changes, AI verdicts, and signed RMA artifacts.
 
 ---
@@ -64,7 +64,7 @@ To scale this MVP into a production-grade institutional platform, our architectu
 
 1. **Immutable Event-Sourcing & Persistence:** Transitioning from stateless client orchestration to PostgreSQL with Prisma, accompanied by event-sourced replay streams to reconstruct FSM states across sessions.
 2. **Dual-Layer Webhook DLQ Architecture:** Implementing background asynchronous reconciliation for `PAYMENT.AUTHORIZATION.VOIDED` and `CUSTOMER.DISPUTE.CREATED` events via HMCA-SHA256 signature verification.
-3. **Byzantine Fault-Tolerant Multi-Model Quorum:** Upgrading arbitration from a single model to a 2-of-3 quorum consensus engine (Gemini 1.5 + Claude 3.5 Sonnet + GPT-4o) for high-value escrows (>$10,000), supplemented by an escrow-bonded human appeal window.
+3. **Byzantine Fault-Tolerant Multi-Model Quorum:** Upgrading arbitration from a single model to a 2-of-3 quorum consensus engine (Gemini Flash-Lite + Claude Sonnet + GPT-4o) for high-value escrows (>$10,000), supplemented by an escrow-bonded human appeal window.
 4. **Multi-Currency Escrow & FX Locking:** Introducing support for PayPal’s 25+ global settlement currencies (EUR, GBP, JPY) using spot rate-locking at authorization creation to prevent cross-border FX drift during clawbacks.
 
 ---

@@ -40,7 +40,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const event = await req.json();
-    console.log(`[PayPal Webhook] Received Event: event.eventtype({event.id})`);
+    console.log(`[PayPal Webhook] Received Event: ${event.event_type} (${event.id})`);
 
     appendEventToLedger(event);
 

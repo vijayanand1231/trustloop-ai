@@ -128,7 +128,7 @@ async function callGeminiNative({
         if (text) return extractJson(text);
       } else {
         const errText = await res.text();
-        console.warn(`[Gemini] model=modelhttp={res.status}: ${errText.slice(0, 160)}`);
+        console.warn(`[Gemini] model=${model} http=${res.status}: ${errText.slice(0, 160)}`);
       }
     } catch (err: any) {
       clearTimeout(timer);
