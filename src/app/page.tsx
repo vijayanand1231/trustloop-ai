@@ -537,7 +537,7 @@ export default function TrustLoopDashboard() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
-                <header className="relative overflow-hidden rounded-2xl border border-indigo-800/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-6 shadow-[0_0_40px_rgba(99,102,241,0.08)]">
+                        <header className="relative overflow-hidden rounded-2xl border border-indigo-800/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-6 shadow-[0_0_40px_rgba(99,102,241,0.08)]">
           {/* Decorative background glow */}
           <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
@@ -559,10 +559,11 @@ export default function TrustLoopDashboard() {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-300 mt-4 max-w-2xl leading-relaxed">
+              <p className="text-base text-slate-300 mt-3 max-w-2xl leading-relaxed">
+                <span className="text-white font-semibold">Agentic Commerce for Autonomous Escrow</span>
+                <span className="text-slate-500"> — </span>
                 Non-custodial <span className="text-indigo-300 font-semibold">PayPal Orders v2</span> escrow with autonomous{" "}
-                <span className="text-violet-300 font-semibold">Gemini Flash-Lite</span> arbitration, governed by a formal{" "}
-                <span className="text-emerald-300 font-semibold">6-state FSM</span> with cryptographic invariant verification.
+                <span className="text-violet-300 font-semibold">Gemini Flash-Lite</span> arbitration.
               </p>
 
               {/* Tech badge row */}
@@ -586,8 +587,42 @@ export default function TrustLoopDashboard() {
               </div>
             </div>
 
-            {/* Right: Live FSM status card */}
-            <div className="flex flex-col items-end gap-2 shrink-0">
+            {/* Right: PayPal brand card + Live FSM status (No GitHub URL) */}
+            <div className="flex flex-col items-end gap-3 shrink-0">
+              {/* PayPal Brand Card */}
+              <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0070ba] to-[#003087] px-4 py-3 min-w-[180px] shadow-lg shadow-blue-900/40 border border-blue-400/20">
+                {/* Decorative network grid */}
+                <div className="absolute -right-4 -bottom-4 opacity-20">
+                  <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="2" fill="white"/>
+                    <circle cx="60" cy="20" r="2" fill="white"/>
+                    <circle cx="40" cy="40" r="2" fill="white"/>
+                    <circle cx="20" cy="60" r="2" fill="white"/>
+                    <circle cx="60" cy="60" r="2" fill="white"/>
+                    <line x1="20" y1="20" x2="40" y2="40" stroke="white" strokeWidth="0.5"/>
+                    <line x1="60" y1="20" x2="40" y2="40" stroke="white" strokeWidth="0.5"/>
+                    <line x1="20" y1="60" x2="40" y2="40" stroke="white" strokeWidth="0.5"/>
+                    <line x1="60" y1="60" x2="40" y2="40" stroke="white" strokeWidth="0.5"/>
+                    <line x1="20" y1="20" x2="60" y2="20" stroke="white" strokeWidth="0.5"/>
+                    <line x1="20" y1="60" x2="60" y2="60" stroke="white" strokeWidth="0.5"/>
+                  </svg>
+                </div>
+                <div className="relative flex items-center gap-2">
+                  {/* PayPal P chevron mark */}
+                  <svg width="22" height="26" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.5 25h-3.5c-0.4 0-0.7-0.3-0.6-0.7l3.3-20.7c0.1-0.4 0.4-0.7 0.8-0.7h8.2c3.8 0 6.7 1.7 7.5 4.9 0.4 1.5 0.4 3.2-0.4 4.9-1.5 3.2-5 4.6-9.3 4.6h-2c-0.4 0-0.7 0.3-0.8 0.7l-1.6 6.3c-0.1 0.4-0.4 0.7-0.8 0.7h-0.8z" fill="#001c64"/>
+                    <path d="M20.8 8.8c-1 4.1-4.4 5.6-8.7 5.6h-2c-0.4 0-0.7 0.3-0.8 0.7l-1.6 6.3-0.4 2.6c-0.1 0.3 0.1 0.6 0.5 0.6h3.7c0.3 0 0.6-0.2 0.7-0.6l0-0.2 0.8-4.9 0-0.3c0-0.3 0.4-0.6 0.7-0.6h0.5c3.6 0 6.4-1.5 7.2-5.7 0.3-1.7 0.1-3.2-0.6-4.2-0.3-0.3-0.5-0.6-0.8-0.8z" fill="#0070e0"/>
+                  </svg>
+                  <span className="text-white font-bold text-lg tracking-tight" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+                    PayPal
+                  </span>
+                </div>
+                <div className="relative text-[10px] font-mono text-blue-100/90 mt-1.5 uppercase tracking-wider">
+                  Sandbox Escrow · Orders v2
+                </div>
+              </div>
+
+              {/* Live FSM Status Card */}
               <div className="rounded-xl border border-slate-700/70 bg-slate-950/60 backdrop-blur px-4 py-3 min-w-[180px]">
                 <div className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mb-1">
                   Live FSM State
@@ -600,17 +635,15 @@ export default function TrustLoopDashboard() {
                   <span>✓</span> Invariant Verified
                 </div>
               </div>
-              <a
-                href="https://github.com/vijayanand1231/trustloop-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] font-mono text-slate-500 hover:text-indigo-400 transition"
-              >
-                github.com/vijayanand1231/trustloop-ai ↗
-              </a>
             </div>
           </div>
         </header>
+
+        {/* FSM Flow Strip — matches Devpost thumbnail aesthetic */}
+        <FSMFlowStrip
+          contractStatus={contractStatus}
+          hasRefunds={Object.values(captures).some((c: any) => c.status === "REFUNDED")}
+        />
 
         {terminal && (
           <div className="rounded-xl border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">
@@ -1342,6 +1375,188 @@ function RMARow({ label, value }: { label: string; value: React.ReactNode }) {
     <div className="flex items-center justify-between gap-2">
       <span className="text-slate-500 uppercase tracking-wider shrink-0">{label}</span>
       <span className="text-right">{value}</span>
+    </div>
+  );
+}
+
+// ─── FSM FLOW STRIP (matches Devpost thumbnail) ───
+type FSMNodeState = "INITIATED" | "AUTHORIZED" | "DISBURSED" | "REFUNDED" | "VOIDED";
+
+const FSM_NODES: Array<{
+  key: FSMNodeState;
+  label: string;
+  color: string;
+  dim: string;
+  glow: string;
+  icon: React.ReactNode;
+}> = [
+  {
+    key: "INITIATED",
+    label: "INITIATED",
+    color: "bg-gradient-to-br from-indigo-500 to-indigo-700 border-indigo-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(99,102,241,0.6)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    ),
+  },
+  {
+    key: "AUTHORIZED",
+    label: "AUTHORIZED",
+    color: "bg-gradient-to-br from-amber-500 to-amber-700 border-amber-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(245,158,11,0.6)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="6" y="4" width="4" height="16" />
+        <rect x="14" y="4" width="4" height="16" />
+      </svg>
+    ),
+  },
+  {
+    key: "DISBURSED",
+    label: "DISBURSED",
+    color: "bg-gradient-to-br from-emerald-500 to-emerald-700 border-emerald-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(16,185,129,0.6)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    ),
+  },
+  {
+    key: "REFUNDED",
+    label: "REFUNDED",
+    color: "bg-gradient-to-br from-rose-500 to-rose-700 border-rose-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(244,63,94,0.6)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="23 4 23 10 17 10" />
+        <polyline points="1 20 1 14 7 14" />
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+      </svg>
+    ),
+  },
+  {
+    key: "VOIDED",
+    label: "VOIDED",
+    color: "bg-gradient-to-br from-slate-500 to-slate-700 border-slate-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(148,163,184,0.5)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    ),
+  },
+];
+
+function FSMFlowStrip({ contractStatus, hasRefunds }: { contractStatus: string; hasRefunds: boolean }) {
+  const activeNodes = new Set<FSMNodeState>();
+  const completedNodes = new Set<FSMNodeState>();
+
+  if (contractStatus === "DRAFT") {
+    activeNodes.add("INITIATED");
+  } else if (contractStatus === "AUTHORIZED" || contractStatus === "IN_EVALUATION") {
+    completedNodes.add("INITIATED");
+    activeNodes.add("AUTHORIZED");
+  } else if (contractStatus === "PARTIALLY_SETTLED") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    activeNodes.add("DISBURSED");
+    if (hasRefunds) activeNodes.add("REFUNDED");
+  } else if (contractStatus === "DISPUTED") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    activeNodes.add("REFUNDED");
+  } else if (contractStatus === "COMPLETED_SETTLED") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    activeNodes.add("DISBURSED");
+  } else if (contractStatus === "COMPLETED_WITH_REFUNDS") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    activeNodes.add("DISBURSED");
+    activeNodes.add("REFUNDED");
+  } else if (contractStatus === "TERMINATED_REFUNDED") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    if (hasRefunds) completedNodes.add("REFUNDED");
+    activeNodes.add("VOIDED");
+  }
+
+  return (
+    <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 p-5 shadow-xl">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
+            Formal Finite State Machine
+          </span>
+          <span className="text-[10px] font-mono text-indigo-400">●</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            6-State Contract Lifecycle
+          </span>
+        </div>
+        <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
+          ✓ Invariant Monotonic
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-1 md:gap-2 overflow-x-auto py-2">
+        {FSM_NODES.map((node, idx) => {
+          const isActive = activeNodes.has(node.key);
+          const isCompleted = completedNodes.has(node.key);
+          const isLit = isActive || isCompleted;
+
+          return (
+            <React.Fragment key={node.key}>
+              <div className="flex flex-col items-center gap-2 shrink-0">
+                <div
+                  className={"relative flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-2xl border-2 text-white transition-all duration-300 " +
+                    (isLit ? node.color : node.dim) + " " +
+                    (isActive ? node.glow + " scale-105" : "") + " " +
+                    (!isLit ? "opacity-40" : "")}
+                >
+                  {isActive && (
+                    <span className={"absolute inset-0 rounded-2xl " + node.color + " animate-ping opacity-30"}></span>
+                  )}
+                  <div className={"relative " + (!isLit ? "text-slate-500" : "")}>
+                    {node.icon}
+                  </div>
+                </div>
+                <span
+                  className={"text-[10px] md:text-[11px] font-mono font-bold uppercase tracking-wider " +
+                    (isActive ? "text-white" : isCompleted ? "text-slate-300" : "text-slate-600")}
+                >
+                  {node.label}
+                </span>
+              </div>
+
+              {idx < FSM_NODES.length - 1 && (
+                <div className="flex-1 flex items-center min-w-[20px]">
+                  <div
+                    className={"h-0.5 w-full transition-colors duration-300 " +
+                      (completedNodes.has(node.key) ? "bg-gradient-to-r from-indigo-500/60 to-slate-700" : "bg-slate-800")}
+                  ></div>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    className={"shrink-0 " + (completedNodes.has(node.key) ? "text-slate-500" : "text-slate-700")}
+                  >
+                    <path d="M0 0 L5 5 L0 10" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 }
