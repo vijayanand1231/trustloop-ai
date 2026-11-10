@@ -537,7 +537,7 @@ export default function TrustLoopDashboard() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-6">
-                        <header className="relative overflow-hidden rounded-2xl border border-indigo-800/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-6 shadow-[0_0_40px_rgba(99,102,241,0.08)]">
+                                <header className="relative overflow-hidden rounded-2xl border border-indigo-800/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-6 shadow-[0_0_40px_rgba(99,102,241,0.08)]">
           {/* Decorative background glow */}
           <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
@@ -563,7 +563,8 @@ export default function TrustLoopDashboard() {
                 <span className="text-white font-semibold">Agentic Commerce for Autonomous Escrow</span>
                 <span className="text-slate-500"> — </span>
                 Non-custodial <span className="text-indigo-300 font-semibold">PayPal Orders v2</span> escrow with autonomous{" "}
-                <span className="text-violet-300 font-semibold">Gemini Flash-Lite</span> arbitration.
+                <span className="text-violet-300 font-semibold">Gemini Flash-Lite</span> arbitration, governed by a formal{" "}
+                <span className="text-emerald-300 font-semibold">6-state FSM</span> with zero-drift invariant verification.
               </p>
 
               {/* Tech badge row */}
@@ -587,11 +588,10 @@ export default function TrustLoopDashboard() {
               </div>
             </div>
 
-            {/* Right: PayPal brand card + Live FSM status (No GitHub URL) */}
+            {/* Right: PayPal brand card + Live FSM status */}
             <div className="flex flex-col items-end gap-3 shrink-0">
               {/* PayPal Brand Card */}
               <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0070ba] to-[#003087] px-4 py-3 min-w-[180px] shadow-lg shadow-blue-900/40 border border-blue-400/20">
-                {/* Decorative network grid */}
                 <div className="absolute -right-4 -bottom-4 opacity-20">
                   <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="2" fill="white"/>
@@ -608,7 +608,6 @@ export default function TrustLoopDashboard() {
                   </svg>
                 </div>
                 <div className="relative flex items-center gap-2">
-                  {/* PayPal P chevron mark */}
                   <svg width="22" height="26" viewBox="0 0 24 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M6.5 25h-3.5c-0.4 0-0.7-0.3-0.6-0.7l3.3-20.7c0.1-0.4 0.4-0.7 0.8-0.7h8.2c3.8 0 6.7 1.7 7.5 4.9 0.4 1.5 0.4 3.2-0.4 4.9-1.5 3.2-5 4.6-9.3 4.6h-2c-0.4 0-0.7 0.3-0.8 0.7l-1.6 6.3c-0.1 0.4-0.4 0.7-0.8 0.7h-0.8z" fill="#001c64"/>
                     <path d="M20.8 8.8c-1 4.1-4.4 5.6-8.7 5.6h-2c-0.4 0-0.7 0.3-0.8 0.7l-1.6 6.3-0.4 2.6c-0.1 0.3 0.1 0.6 0.5 0.6h3.7c0.3 0 0.6-0.2 0.7-0.6l0-0.2 0.8-4.9 0-0.3c0-0.3 0.4-0.6 0.7-0.6h0.5c3.6 0 6.4-1.5 7.2-5.7 0.3-1.7 0.1-3.2-0.6-4.2-0.3-0.3-0.5-0.6-0.8-0.8z" fill="#0070e0"/>
@@ -659,6 +658,20 @@ export default function TrustLoopDashboard() {
           <StatCard label="Voided" value={totalVoided} subtitle={totalVoided > 0 ? "Returned to buyer" : "—"} tone="rose" />
           <StatCard label="Remaining in Vault" value={totalRemaining} subtitle={terminal ? "Released / Voided" : "Protected"} tone="indigo" />
         </div>
+
+        {/* Invariant Verified Banner — only on terminal states */}
+        {terminal && (
+          <InvariantVerifiedBanner
+            authorized={authId ? totalAmount : 0}
+            disbursed={totalDisbursed}
+            refunded={totalRefunded}
+            voided={totalVoided}
+            remaining={totalRemaining}
+            contractStatus={contractStatus}
+            authId={authId || undefined}
+            lastRmaId={Object.values(evaluations).find((e) => e.decision === "DISPUTE_DOSSIER")?.rmaId}
+          />
+        )}
         {/* Live Audit Trail & RMA Event Ledger */}
         <AuditTimeline
           contractStatus={contractStatus}
@@ -1185,7 +1198,7 @@ function AuditTimeline({
         <span className="text-[11px] font-bold text-emerald-400">Zero Drift Identity</span>
       </div>
 
-            <div className="mt-4 space-y-3 font-mono text-xs">
+      <div className="mt-4 space-y-3 font-mono text-xs">
         {entries.map((e, idx) => {
           const style = EVENT_STYLES[e.type] ?? EVENT_STYLES.FSM;
           const previousWasReal = idx > 0 && !entries[idx - 1].isPreview;
@@ -1241,7 +1254,7 @@ function AuditTimeline({
 
 function StatCard({
   label, value, subtitle, tone,
-}: { label: string; value: number; subtitle: string; tone: "white" | "emerald" | "amber" | "indigo" | "rose" | string | "rose" | string }) {
+}: { label: string; value: number; subtitle: string; tone: "white" | "emerald" | "amber" | "indigo" | "rose" }) {
   const toneClass =
     tone === "white" ? "text-white"
     : tone === "rose" ? "text-rose-400" : tone === "emerald" ? "text-emerald-400"
