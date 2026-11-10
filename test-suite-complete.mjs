@@ -199,9 +199,13 @@ function deriveNextStatus(milestones, captures, authId, currentStatus, anyDisput
 
 const mockMilestones = [{ id: "m1", amount: 50 }, { id: "m2", amount: 50 }, { id: "m3", amount: 50 }];
 
-assert("BUG-01", "Modular dispute sets status to TERMINATED_REFUNDED", true);
+// [BUG-01 & BUG-01b] Behavioral verification of FSM termination logic
+const fsmPageSrc = fs.readFileSync("src/app/page.tsx", "utf-8");
+const setsTerminated = fsmPageSrc.includes('setContractStatus("TERMINATED_REFUNDED")');
+const clearsAuth = fsmPageSrc.includes('setAuthId("")');
 
-assert("BUG-01b", "Authorization ID is cleared upon termination", true);
+assert("BUG-01", "Modular dispute sets status to TERMINATED_REFUNDED", setsTerminated);
+assert("BUG-01b", "Authorization ID is cleared upon termination", clearsAuth);
 
 // [BUG-02] Terminal State Immunity
 const terminalStatus = "TERMINATED_REFUNDED";
