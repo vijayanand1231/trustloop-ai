@@ -648,7 +648,7 @@ export default function TrustLoopDashboard() {
                 </span>
               ) : (
                 <>
-                  <div id="paypal-button-container" className="min-w-[180px] max-w-[280px] w-full"></div>
+                  <div id="paypal-button-container" className="w-full min-w-[220px] max-w-[360px] overflow-visible"></div>
                   {DEV_AUTH_ENABLED && (
                     <button onClick={handleDevFastTrackAuth}
                       className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-2 rounded-lg font-medium transition">
