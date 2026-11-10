@@ -302,7 +302,7 @@ export async function evaluateDeliverableProof({
     return {
       decision: "DISPUTE_DOSSIER",
       confidence: 96,
-      reasoning: `CRITICAL DEFECT FLAGGED on title:non-conformancedetected:"{safeNotes.slice(0, 100)}"`,
+      reasoning: `CRITICAL DEFECT FLAGGED on ${title}: non-conformance detected: "${safeNotes.slice(0, 100)}"`,
       rmaId: "RMA-" + Math.floor(100000 + Math.random() * 900000),
     };
   }
