@@ -88,7 +88,6 @@ export default function TrustLoopDashboard() {
 
   const [isExtracting, setIsExtracting] = useState(false);
   const [authId, setAuthId] = useState<string>("");
-  const [clientId, setClientId] = useState<string>("");
   const [sdkReady, setSdkReady] = useState(false);
 
   const [contractStatus, setContractStatus] = useState<ContractStatus>("DRAFT");
@@ -173,7 +172,6 @@ export default function TrustLoopDashboard() {
       .then((r) => r.json())
       .then((data) => {
         if (!data.clientId) return;
-        setClientId(data.clientId);
         if (document.getElementById("paypal-sdk-script")) {
           setSdkReady(true);
           return;
@@ -410,6 +408,16 @@ export default function TrustLoopDashboard() {
           ...prev,
           [milestoneId]: { ...prev[milestoneId], status: "REFUNDED", refundId, refundedAmount },
         }));
+
+        // Clear stale evaluation so the AI quality gate MUST re-run before any re-capture.
+        // Without this, the pre-refund CAPTURE_PAYMENT verdict remains and the payout
+        // stage renders an enabled Capture button that bypasses the quality gate and
+        // would silently overwrite REFUNDED -> CAPTURED, breaking the zero-drift invariant.
+        setEvaluations((prev) => {
+          const copy = { ...prev };
+          delete copy[milestoneId];
+          return copy;
+        });
       } catch (err: any) {
         alert("Refund error: " + err.message);
       } finally {
@@ -501,6 +509,7 @@ export default function TrustLoopDashboard() {
         });
         setTerminationReason("MODULAR partial settlement: captured milestones preserved; vault released.");
         setAuthId("");
+        setEvaluations({}); // Parity with TURNKEY branch — clear all evals on termination
         setContractStatus("TERMINATED_REFUNDED");
       }
     } finally {
@@ -581,10 +590,7 @@ export default function TrustLoopDashboard() {
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                   Next.js 16
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider bg-slate-800/70 border border-slate-700 text-slate-300 px-2.5 py-1 rounded-full">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                  27/27 Tests Passing
-                </span>
+                
               </div>
             </div>
 
