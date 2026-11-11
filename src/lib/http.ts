@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { PayPalApiError } from "@/lib/paypal-error";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -42,12 +41,15 @@ export function toErrorResponse(error: unknown): NextResponse {
     return json({ error: error.message }, error.status);
   }
 
-  if (error instanceof PayPalApiError) {
-    const status = error.status >= 400 && error.status < 500 ? error.status : 502;
+  // PayPal errors are thrown by src/lib/paypal.ts as plain Error
+  // objects with a numeric `.status` property; pass that through.
+  const anyErr = error as Error & { status?: number; details?: any };
+  if (anyErr && typeof anyErr.status === "number" && anyErr.status >= 400) {
+    const status = anyErr.status < 500 ? anyErr.status : 502;
     return json(
       {
-        error: error.message,
-        ...(error.debugId ? { debugId: error.debugId } : {}),
+        error: anyErr.message,
+        ...(anyErr.details?.debug_id ? { debugId: anyErr.details.debug_id } : {}),
       },
       status,
     );

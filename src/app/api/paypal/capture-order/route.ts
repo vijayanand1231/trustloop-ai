@@ -18,11 +18,18 @@ export async function POST(req: Request) {
       );
     }
 
+    // ─── Milestone-scoped PayPal-Request-Id (prevent collision) ───
+    // Prefer frontend header; fall back to safe server-derived key.
+    const idempotencyKey =
+      req.headers.get("x-idempotency-key") ||
+      `cap:authorizationId:{milestoneId}`;
+
     console.log("[API /capture-order] Processing milestone capture:", {
       authorizationId,
       milestoneId,
       amount,
       isFinalCapture,
+      idempotencyKey,
     });
 
     const result = await captureAuthorizedPayment({
@@ -31,6 +38,7 @@ export async function POST(req: Request) {
       currency,
       isFinalCapture,
       note,
+      idempotencyKey,   // ← forward to the PayPal client
     });
 
     return NextResponse.json({ ...result, milestoneId }, { status: 200 });

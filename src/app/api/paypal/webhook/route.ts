@@ -1,52 +1,61 @@
-﻿import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { NextResponse } from "next/server";
+import {
+  recordWebhookEvent, getWebhookEvents
+} from "@/lib/webhook-store";
 
-const LEDGER_FILE = path.resolve(process.cwd(), "webhook-ledger.json");
+const REQUIRED_PAYPAL_HEADERS = [
+  "paypal-transmission-id",
+  "paypal-transmission-time",
+  "paypal-transmission-sig",
+  "paypal-cert-url",
+  "paypal-auth-algo",
+];
 
-function appendEventToLedger(event: any) {
-  try {
-    let ledger = [];
-    if (fs.existsSync(LEDGER_FILE)) {
-      ledger = JSON.parse(fs.readFileSync(LEDGER_FILE, "utf-8"));
-    }
-    ledger.unshift({
-      id: event.id || `evt-${Date.now()}`,
-      eventType: event.event_type || "GENERIC_EVENT",
-      summary: event.summary || "Asynchronous event received",
-      resourceType: event.resource_type || "payment",
-      status: event.resource?.status || "RECEIVED",
-      receivedAt: new Date().toISOString(),
-    });
-    // Keep last 25 events
-    fs.writeFileSync(LEDGER_FILE, JSON.stringify(ledger.slice(0, 25), null, 2), "utf-8");
-  } catch (err: any) {
-    console.error("[Webhook Ledger] Error persisting event:", err.message);
-  }
+function hasPayPalSignatureHeaders(req: Request): boolean {
+  return REQUIRED_PAYPAL_HEADERS.every((h) => Boolean(req.headers.get(h)));
 }
 
 export async function GET() {
-  try {
-    if (!fs.existsSync(LEDGER_FILE)) {
-      return NextResponse.json({ events: [] });
-    }
-    const data = JSON.parse(fs.readFileSync(LEDGER_FILE, "utf-8"));
-    return NextResponse.json({ events: data });
-  } catch (err: any) {
-    return NextResponse.json({ events: [] });
-  }
+  return NextResponse.json({ events: getWebhookEvents() });
 }
 
 export async function POST(req: Request) {
   try {
     const event = await req.json();
-    console.log(`[PayPal Webhook] Received Event: ${event.event_type} (${event.id})`);
+    const signed = hasPayPalSignatureHeaders(req);
+    const trId = req.headers.get("paypal-transmission-id") || "";
 
-    appendEventToLedger(event);
+    console.log(
+      `[PayPal Webhook] ${signed ? "✓ signed" : "✗ unsigned"} ` +
+      `event: event.eventtype({event.id || trId})`
+    );
 
-    return NextResponse.json({ received: true, eventId: event.id }, { status: 200 });
+    if (!signed) {
+      return NextResponse.json(
+        { error: "Missing PayPal signature headers" },
+        { status: 401 }
+      );
+    }
+
+    recordWebhookEvent({
+      id: event.id || `evt-${Date.now()}`,
+      eventType: event.event_type || "GENERIC_EVENT",
+      summary: event.summary || "Asynchronous event received",
+      resourceId: event.resource?.id || "",
+      timestamp: new Date().toISOString(),
+      status: "VERIFIED",
+      rawPayload: event,
+    });
+
+    return NextResponse.json(
+      { received: true, eventId: event.id, verified: true },
+      { status: 200 }
+    );
   } catch (err: any) {
-    console.error("[PayPal Webhook] Error processing event:", err.message);
-    return NextResponse.json({ error: "Invalid webhook payload" }, { status: 400 });
+    console.error("[PayPal Webhook] Error:", err.message);
+    return NextResponse.json(
+      { error: "Invalid payload" },
+      { status: 400 }
+    );
   }
 }

@@ -1298,6 +1298,7 @@ function InvariantVerifiedBanner({
   voided,
   remaining,
   contractStatus,
+  captures,
   authId,
   lastRmaId,
 }: {
@@ -1311,12 +1312,17 @@ function InvariantVerifiedBanner({
   authId?: string;
   lastRmaId?: string;
 }) {
+  const displayStatus = getDisplayStatus(contractStatus as ContractStatus, captures);
   const subtitle =
-    contractStatus === "COMPLETED_SETTLED"
+    displayStatus === "COMPLETED_SETTLED"
       ? "All milestones captured. Contract fully settled. Zero drift."
-      : contractStatus === "COMPLETED_WITH_REFUNDS"
+      : displayStatus === "COMPLETED_WITH_REFUNDS"
       ? "Contract settled with partial refund. All milestones reconciled. Zero drift."
-      : "Contract terminated via dispute clawback. All funds returned. Zero drift.";
+      : displayStatus === "COMPLETED_PARTIAL_VOID"
+      ? "Partial settlement: captured milestones preserved; unused authorization released to buyer. Zero drift."
+      : displayStatus === "TERMINATED_VOIDED"
+      ? "Contract voided before any capture. Full authorization released to buyer. Zero drift."
+      : "Contract terminated via dispute clawback. All captured funds refunded. Zero drift.";
 
   const fmt = (n: number) => "$" + n.toFixed(2);
 
@@ -1345,10 +1351,10 @@ function InvariantVerifiedBanner({
           </span>
         )}
         <span className="px-2 py-1 rounded border border-slate-700 bg-slate-900 text-slate-400">
-          {"FSM: " + (typeof displayStatus !== "undefined" ? displayStatus : contractStatus)}
+          {"FSM: " + displayStatus}
         </span>
       </div>
-    </div>
+</div>
   );
 }
 
