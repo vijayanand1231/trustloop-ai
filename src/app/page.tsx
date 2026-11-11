@@ -33,6 +33,20 @@ const TERMINAL_STATUSES: ContractStatus[] = [
   "COMPLETED_SETTLED"];
 const isTerminal = (s: ContractStatus) => TERMINAL_STATUSES.includes(s);
 
+// ─── Display-layer helper: semantically accurate label ───
+function getDisplayStatus(
+  contractStatus: ContractStatus,
+  captures?: Record<string, any>
+): string {
+  if (contractStatus !== "TERMINATED_REFUNDED") return contractStatus;
+  const vals = Object.values(captures || {});
+  const hasRefunds = vals.some((c: any) => c?.status === "REFUNDED");
+  const hasCaptures = vals.some((c: any) => c?.status === "CAPTURED");
+  if (hasRefunds) return "TERMINATED_REFUNDED";
+  if (hasCaptures) return "COMPLETED_PARTIAL_VOID";
+  return "TERMINATED_VOIDED";
+}
+
 interface Milestone {
   id: string;
   title: string;
@@ -634,7 +648,7 @@ export default function TrustLoopDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={"h-2.5 w-2.5 rounded-full " + statusColor}></span>
-                  <span className="text-sm font-mono font-bold text-white">{contractStatus}</span>
+                  <span className="text-sm font-mono font-bold text-white">{getDisplayStatus(contractStatus, captures)}</span>
                 </div>
                 <div className="text-[10px] font-mono text-emerald-400 mt-2 flex items-center gap-1">
                   <span>✓</span> Invariant Verified
@@ -648,11 +662,12 @@ export default function TrustLoopDashboard() {
         <FSMFlowStrip
           contractStatus={contractStatus}
           hasRefunds={Object.values(captures).some((c: any) => c.status === "REFUNDED")}
+          hasCaptures={Object.values(captures).some((c: any) => c.status === "CAPTURED")}
         />
 
         {terminal && (
           <div className="rounded-xl border border-rose-800 bg-rose-950/40 p-4 text-sm text-rose-200">
-            <strong>Contract {contractStatus}.</strong> All actions are locked.
+            <strong>Contract {getDisplayStatus(contractStatus, captures)}.</strong> All actions are locked.
             {terminationReason && <div className="mt-1 text-xs text-rose-300/80">{terminationReason}</div>}
           </div>
         )}
@@ -1111,9 +1126,9 @@ function AuditTimeline({
       time: formatTPlus(termSec),
       tag: "LEDGER",
       type: contractStatus === "TERMINATED_REFUNDED" ? "VOID" : "LEDGER",
-      title: "Terminal State Reached: " + contractStatus,
+      title: "Terminal State Reached: " + (typeof getDisplayStatus === "function" ? getDisplayStatus(contractStatus, captures) : contractStatus),
       details: "Reconciliation: $" + (authId ? totalAmount : 0).toFixed(2) + " Auth == $" + (totalDisbursed || 0).toFixed(2) + " Disbursed + $" + (totalRefunded || 0).toFixed(2) + " Refunded + $" + (totalVoided || 0).toFixed(2) + " Voided + $" + (totalRemaining || 0).toFixed(2) + " Remaining (Zero Drift Verified)",
-      tone: contractStatus === "COMPLETED_SETTLED" ? "emerald" : "amber",
+      tone: ((typeof getDisplayStatus === "function" ? getDisplayStatus(contractStatus, captures) : contractStatus) === "COMPLETED_SETTLED" || (typeof getDisplayStatus === "function" ? getDisplayStatus(contractStatus, captures) : contractStatus) === "COMPLETED_PARTIAL_VOID") ? "emerald" : "amber",
     });
   }
 
@@ -1292,6 +1307,7 @@ function InvariantVerifiedBanner({
   voided: number;
   remaining: number;
   contractStatus: string;
+  captures?: Record<string, any>;
   authId?: string;
   lastRmaId?: string;
 }) {
@@ -1329,7 +1345,7 @@ function InvariantVerifiedBanner({
           </span>
         )}
         <span className="px-2 py-1 rounded border border-slate-700 bg-slate-900 text-slate-400">
-          {"FSM: " + contractStatus}
+          {"FSM: " + (typeof displayStatus !== "undefined" ? displayStatus : contractStatus)}
         </span>
       </div>
     </div>
@@ -1475,7 +1491,7 @@ const FSM_NODES: Array<{
   },
 ];
 
-function FSMFlowStrip({ contractStatus, hasRefunds }: { contractStatus: string; hasRefunds: boolean }) {
+function FSMFlowStrip({ contractStatus, hasRefunds, hasCaptures }: { contractStatus: string; hasRefunds: boolean; hasCaptures?: boolean }) {
   const activeNodes = new Set<FSMNodeState>();
   const completedNodes = new Set<FSMNodeState>();
 
@@ -1505,6 +1521,7 @@ function FSMFlowStrip({ contractStatus, hasRefunds }: { contractStatus: string; 
   } else if (contractStatus === "TERMINATED_REFUNDED") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
+    if (hasCaptures) completedNodes.add("DISBURSED");
     if (hasRefunds) completedNodes.add("REFUNDED");
     activeNodes.add("VOIDED");
   }
