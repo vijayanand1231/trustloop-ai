@@ -236,6 +236,79 @@ export async function parseContractMilestones(brief: string): Promise<ContractSc
   }
 
   const isHardware = /sensor|iot|hardware|device|physical|ship|delivery|unit|ip67/i.test(safeBrief);
+
+  // ─── Smart Fallback: Section-chunked extraction ───
+  const markerRegex = /(?:^|[.\n;,])\s*(?:Stage|Phase|Milestone|Step)\s+(\d+)\s*[:\-.]?\s*/gi;
+  const markers: { index: number; end: number; num: number }[] = [];
+  let mMatch: RegExpExecArray | null;
+
+  while ((mMatch = markerRegex.exec(safeBrief)) !== null) {
+    markers.push({
+      index: mMatch.index,
+      end: markerRegex.lastIndex,
+      num: Number(mMatch[1]),
+    });
+    if (markers.length >= 6) break;
+  }
+
+  const statedTotalMatch = safeBrief.match(/(?:\$|budget:?\s*\$?)(\d+(?:\.\d{1,2})?)\s*(?:total|budget)?/i);
+  const statedTotal = statedTotalMatch ? Number(statedTotalMatch[1]) : 0;
+
+  if (markers.length >= 2) {
+    const extracted: { id: string; title: string; amount: number; criteria: string }[] = [];
+
+    for (let i = 0; i < markers.length; i++) {
+      const start = markers[i].end;
+      const end = i + 1 < markers.length ? markers[i + 1].index : safeBrief.length;
+      let chunk = safeBrief.slice(start, end).trim();
+
+      if (i === markers.length - 1) {
+        chunk = chunk.replace(/[.\n;,]?\s*\$?(\d+(?:\.\d{1,2})?)\s*(?:total|budget)[\s\S]*$/i, "").trim();
+      }
+
+      const amountMatches = [...chunk.matchAll(/(?:\(\s*\$?\s*(\d+(?:\.\d{1,2})?)\s*(?:USD)?\s*\)|\$(\d+(?:\.\d{1,2})?))/gi)];
+      const stageAmount = amountMatches.reduce((sum, m) => sum + Number(m[1] || m[2] || 0), 0);
+
+      const cleanTitle = chunk
+        .replace(/(?:\(\s*\$?\s*\d+(?:\.\d{1,2})?\s*(?:USD)?\s*\)|\$\d+(?:\.\d{1,2})?)/gi, "")
+        .replace(/[.\n;,]+$/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      extracted.push({
+        id: `m-${i + 1}`,
+        title: (cleanTitle || `Milestone ${i + 1}`).slice(0, 160),
+        amount: stageAmount,
+        criteria: `Delivery and specification sign-off for milestone ${i + 1}.`,
+      });
+    }
+
+    const explicitSum = extracted.reduce((s, m) => s + m.amount, 0);
+    const zeroAmountMilestones = extracted.filter((m) => m.amount === 0);
+
+    if (zeroAmountMilestones.length > 0) {
+      const budgetPool = statedTotal > explicitSum ? statedTotal - explicitSum : 50 * zeroAmountMilestones.length;
+      const basePerStage = Math.floor(budgetPool / zeroAmountMilestones.length);
+      let remainder = budgetPool % zeroAmountMilestones.length;
+
+      zeroAmountMilestones.forEach((m) => {
+        m.amount = basePerStage + (remainder > 0 ? 1 : 0);
+        if (remainder > 0) remainder--;
+      });
+    }
+
+    const finalTotal = extracted.reduce((s, m) => s + m.amount, 0);
+
+    return {
+      contractType: isHardware ? "TURNKEY" : "MODULAR",
+      arbitrationPolicy: isHardware
+        ? "Interdependent physical hardware: Downstream units lack utility without working prototype. Default triggers full contract clawback."
+        : "Independent modular deliverables: Completed stages retain standalone commercial value.",
+      totalAmount: finalTotal,
+      milestones: extracted,
+    };
+  }
+
   return {
     contractType: isHardware ? "TURNKEY" : "MODULAR",
     arbitrationPolicy: isHardware
