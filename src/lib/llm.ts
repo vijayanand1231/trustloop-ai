@@ -101,7 +101,7 @@ async function callGeminiNative({
 
   for (const model of models) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4500);
+    const timer = setTimeout(() => controller.abort(), 10000);
     try {
       const url =
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent` +
@@ -156,7 +156,7 @@ export async function queryLLM({
   const model = process.env.LLM_MODEL || "gpt-4o-mini";
   const url = baseUrl.replace(/\/+$/, "") + "/chat/completions";
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4500);
+  const timer = setTimeout(() => controller.abort(), 10000);
   try {
     const res = await fetch(url, {
       method: "POST",
