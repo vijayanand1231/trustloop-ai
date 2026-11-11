@@ -1421,7 +1421,7 @@ function RMARow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 // ─── FSM FLOW STRIP (matches Devpost thumbnail) ───
-type FSMNodeState = "INITIATED" | "AUTHORIZED" | "DISBURSED" | "REFUNDED" | "VOIDED";
+type FSMNodeState = "INITIATED" | "AUTHORIZED" | "IN_EVAL" | "DISBURSED" | "REFUNDED" | "VOIDED";
 
 const FSM_NODES: Array<{
   key: FSMNodeState;
@@ -1453,6 +1453,21 @@ const FSM_NODES: Array<{
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="6" y="4" width="4" height="16" />
         <rect x="14" y="4" width="4" height="16" />
+      </svg>
+    ),
+  },
+  {
+    key: "IN_EVAL",
+    label: "IN_EVAL",
+    color: "bg-gradient-to-br from-violet-500 to-violet-700 border-violet-400",
+    dim: "bg-slate-900 border-slate-700",
+    glow: "shadow-[0_0_25px_rgba(139,92,246,0.6)]",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <line x1="11" y1="8" x2="11" y2="14" />
+        <line x1="8" y1="11" x2="14" y2="11" />
       </svg>
     ),
   },
@@ -1503,30 +1518,39 @@ function FSMFlowStrip({ contractStatus, hasRefunds, hasCaptures }: { contractSta
 
   if (contractStatus === "DRAFT") {
     activeNodes.add("INITIATED");
-  } else if (contractStatus === "AUTHORIZED" || contractStatus === "IN_EVALUATION") {
+  } else if (contractStatus === "AUTHORIZED") {
     completedNodes.add("INITIATED");
     activeNodes.add("AUTHORIZED");
+  } else if (contractStatus === "IN_EVALUATION") {
+    completedNodes.add("INITIATED");
+    completedNodes.add("AUTHORIZED");
+    activeNodes.add("IN_EVAL");
   } else if (contractStatus === "PARTIALLY_SETTLED") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
+    completedNodes.add("IN_EVAL");
     activeNodes.add("DISBURSED");
     if (hasRefunds) activeNodes.add("REFUNDED");
   } else if (contractStatus === "DISPUTED") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
-    activeNodes.add("REFUNDED");
+    if (hasCaptures) completedNodes.add("DISBURSED");
+    activeNodes.add("IN_EVAL");
   } else if (contractStatus === "COMPLETED_SETTLED") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
+    completedNodes.add("IN_EVAL");
     activeNodes.add("DISBURSED");
   } else if (contractStatus === "COMPLETED_WITH_REFUNDS") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
+    completedNodes.add("IN_EVAL");
     activeNodes.add("DISBURSED");
     activeNodes.add("REFUNDED");
   } else if (contractStatus === "TERMINATED_REFUNDED") {
     completedNodes.add("INITIATED");
     completedNodes.add("AUTHORIZED");
+    completedNodes.add("IN_EVAL");
     if (hasCaptures) completedNodes.add("DISBURSED");
     if (hasRefunds) completedNodes.add("REFUNDED");
     activeNodes.add("VOIDED");
