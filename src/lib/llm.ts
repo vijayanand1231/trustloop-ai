@@ -110,7 +110,7 @@ async function callGeminiNative({
         systemInstruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
         generationConfig: {
-          temperature: 0.2,
+          temperature: 0,
           responseMimeType: "application/json",
           ...(responseSchema ? { responseSchema } : {}),
         },
@@ -169,7 +169,7 @@ export async function queryLLM({
           { role: "user", content: userPrompt },
         ],
         response_format: { type: "json_object" },
-        temperature: 0.2,
+        temperature: 0,
       }),
     });
     clearTimeout(timer);

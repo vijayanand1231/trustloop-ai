@@ -1354,7 +1354,7 @@ function InvariantVerifiedBanner({
           {"FSM: " + displayStatus}
         </span>
       </div>
-</div>
+    </div>
   );
 }
 
