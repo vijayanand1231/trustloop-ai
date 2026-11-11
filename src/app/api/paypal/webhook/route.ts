@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
     console.log(
       `[PayPal Webhook] ${signed ? "✓ signed" : "✗ unsigned"} ` +
-      `event: event.eventtype({event.id || trId})`
+      `event: ${event.event_type} (${event.id || trId})`
     );
 
     if (!signed) {

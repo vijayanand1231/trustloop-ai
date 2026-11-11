@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     // Prefer frontend header; fall back to safe server-derived key.
     const idempotencyKey =
       req.headers.get("x-idempotency-key") ||
-      `cap:authorizationId:{milestoneId}`;
+      `cap:${authorizationId}:${milestoneId}`;
 
     console.log("[API /capture-order] Processing milestone capture:", {
       authorizationId,
